@@ -19,14 +19,13 @@ class Cart implements \App\Service\Cart\Cart
     #[ORM\Column(type: 'uuid', nullable: false)]
     private UuidInterface $id;
 
-    #[ORM\ManyToMany(targetEntity: 'Product')]
-    #[ORM\JoinTable(name: 'cart_products')]
-    private Collection $products;
+    #[ORM\OneToMany(mappedBy: 'cart', targetEntity: CartProduct::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private Collection $cartProducts;
 
     public function __construct(string $id)
     {
         $this->id = Uuid::fromString($id);
-        $this->products = new ArrayCollection();
+        $this->cartProducts = new ArrayCollection();
     }
 
     public function getId(): string
@@ -37,8 +36,8 @@ class Cart implements \App\Service\Cart\Cart
     public function getTotalPrice(): int
     {
         return array_reduce(
-            $this->products->toArray(),
-            static fn(int $total, Product $product): int => $total + $product->getPrice(),
+            $this->cartProducts->toArray(),
+            static fn(int $total, CartProduct $cartProduct): int => $total + $cartProduct->getQuantity() * $cartProduct->getProduct()->getPrice(),
             0
         );
     }
@@ -46,27 +45,59 @@ class Cart implements \App\Service\Cart\Cart
     #[Pure]
     public function isFull(): bool
     {
-        return $this->products->count() >= self::CAPACITY;
+        $counted = array_sum(
+            $this->cartProducts->map(fn($product) => $product->getQuantity())->toArray()
+        );
+
+        return $counted >= self::CAPACITY;
     }
 
-    public function getProducts(): iterable
+    public function getCartProducts(): iterable
     {
-        return $this->products->getIterator();
+        return $this->cartProducts->getIterator();
     }
 
     #[Pure]
     public function hasProduct(\App\Entity\Product $product): bool
     {
-        return $this->products->contains($product);
+        foreach ($this->cartProducts as $cartProduct) {
+            if ($cartProduct->getProduct() === $product) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
-    public function addProduct(\App\Entity\Product $product): void
+    public function addProduct(Product $product): void
     {
-        $this->products->add($product);
+        foreach ($this->cartProducts as $cartProduct) {
+            if ($cartProduct->getProduct() === $product) {
+                $cartProduct->increaseQuantity();
+                return;
+            }
+        }
+
+        $cartProduct = new CartProduct();
+        $cartProduct->setCart($this);
+        $cartProduct->setProduct($product);
+        $cartProduct->setQuantity(1);
+
+        $this->cartProducts->add($cartProduct);
     }
 
-    public function removeProduct(\App\Entity\Product $product): void
+    public function removeProduct(Product $product): void
     {
-        $this->products->removeElement($product);
+        foreach ($this->cartProducts as $cartProduct) {
+            if ($cartProduct->getProduct() === $product) {
+                if ($cartProduct->getQuantity() > 1) {
+                    $cartProduct->decreaseQuantity();
+                } else {
+                    $this->cartProducts->removeElement($cartProduct);
+                }
+
+                return;
+            }
+        }
     }
 }
