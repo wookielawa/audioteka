@@ -8,6 +8,8 @@ use App\Messenger\AddProductToCart;
 use App\Messenger\MessageBusAwareInterface;
 use App\Messenger\MessageBusTrait;
 use App\ResponseBuilder\ErrorBuilder;
+use App\ResponseBuilder\QueuedBuilder;
+use Ramsey\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -20,7 +22,7 @@ class AddProductController extends AbstractController implements MessageBusAware
 {
     use MessageBusTrait;
 
-    public function __construct(private ErrorBuilder $errorBuilder) { }
+    public function __construct(private ErrorBuilder $errorBuilder, private QueuedBuilder $queuedBuilder) {}
 
     public function __invoke(Cart $cart, Product $product): Response
     {
@@ -31,8 +33,10 @@ class AddProductController extends AbstractController implements MessageBusAware
             );
         }
 
-        $this->dispatch(new AddProductToCart($cart->getId(), $product->getId()));
+        $operationId = Uuid::uuid4()->toString();
 
-        return new Response('', Response::HTTP_ACCEPTED);
+        $this->dispatch(new AddProductToCart($operationId, $cart->getId(), $product->getId()));
+
+        return new JsonResponse($this->queuedBuilder->__invoke($operationId), Response::HTTP_ACCEPTED);
     }
 }
