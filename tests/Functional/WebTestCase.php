@@ -2,19 +2,14 @@
 
 namespace App\Tests\Functional;
 
-use Doctrine\Bundle\FixturesBundle\ORMFixtureInterface;
-use Doctrine\Common\DataFixtures\Executor\ORMExecutor;
-use Doctrine\Common\DataFixtures\FixtureInterface;
-use Doctrine\Common\DataFixtures\Loader;
-use Doctrine\Common\DataFixtures\Purger\ORMPurger;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Tests\LoadFixturesTrait;
 use Doctrine\ORM\Tools\SchemaTool;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 class WebTestCase extends \Symfony\Bundle\FrameworkBundle\Test\WebTestCase
 {
+    use LoadFixturesTrait;
     protected KernelBrowser $client;
-    protected EntityManagerInterface $entityManager;
 
     protected function setUp(): void
     {
@@ -32,18 +27,7 @@ class WebTestCase extends \Symfony\Bundle\FrameworkBundle\Test\WebTestCase
         $schemaTool->createSchema($metadata);
     }
 
-    protected function loadFixtures(FixtureInterface ...$fixtures): void
-    {
-        $loader = new Loader();
-        foreach ($fixtures as $fixture) {
-            $loader->addFixture($fixture);
-        }
 
-        $purger = new ORMPurger($this->entityManager);
-
-        $executor = new ORMExecutor($this->entityManager, $purger);
-        $executor->execute($loader->getFixtures());
-    }
 
     protected function getJsonResponse(): array
     {
