@@ -1,13 +1,13 @@
 <?php
 
-namespace App\Tests\Integration\Repository;
+namespace App\Tests\Integration\Service;
 
 use App\Entity\Cart;
 use App\Entity\Product;
 use Doctrine\Common\DataFixtures\AbstractFixture;
 use Doctrine\Persistence\ObjectManager;
 
-class AddProductRepositoryFixture extends AbstractFixture
+class AddProductToTheCartFixture extends AbstractFixture
 {
     public function load(ObjectManager $manager): void
     {
