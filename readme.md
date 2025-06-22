@@ -28,3 +28,12 @@ W pliku [requirements.pdf](./requirements.pdf) znajdziesz scenariusz Twojego zad
 
 Powodzenia!
 
+
+## Aby uruchomić projekt po zmianach:
+
+1. Zbuduj obrazy dockera `docker compose build`
+1. Zainstaluj zależności `docker compose run --rm php composer install`.
+1. Zainicjalizuj bazę danych jeżeli nie masz jej lokalnie `docker compose run --rm php php bin/console doctrine:database:create`.
+1. Uruchom migracje `docker compose run --rm php php bin/console doctrine:migrations:migrate`.
+1. Zainicjalizuj kolejkę Messengera `docker compose run --rm php php bin/console messenger:setup-transports`.
+1. Uruchom serwis za pomocą `docker compose up -d`.
