@@ -5,11 +5,11 @@ namespace App\Repository;
 use App\Entity\CartAddProductStatus;
 use App\Entity\Product;
 use App\Service\Cart\Cart;
-use App\Service\Cart\CartService;
+use App\Service\Cart\CartServiceInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Ramsey\Uuid\Uuid;
 
-class CartRepository implements CartService
+class CartRepository implements CartServiceInterface
 {
     public function __construct(private EntityManagerInterface $entityManager) {}
 

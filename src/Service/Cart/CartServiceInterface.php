@@ -4,7 +4,7 @@ namespace App\Service\Cart;
 
 use App\Service\Catalog\Product;
 
-interface CartService
+interface CartServiceInterface
 {
     public function addProduct(string $operationId, string $cartId, string $productId): void;
 
