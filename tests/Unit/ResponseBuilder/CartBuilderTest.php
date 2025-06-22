@@ -33,9 +33,11 @@ class CartBuilderTest extends TestCase
 
     public function test_builds_cart_with_products(): void
     {
+        $createdAt = new \DateTimeImmutable('2025-06-21 12:00:00');
+
         $cart = new Cart('3db5f857-e5a3-4c8d-a262-37da156c0001');
-        $cart->addProduct(new Product('16e0226c-0ed8-434a-9342-429aefeb98f0', 'Product 1', 1990));
-        $cart->addProduct(new Product('5884ad4c-9ac2-40a5-ba11-1a96156c5889', 'Product 2', 3690));
+        $cart->addProduct(new Product('16e0226c-0ed8-434a-9342-429aefeb98f0', 'Product 1', 1990, $createdAt));
+        $cart->addProduct(new Product('5884ad4c-9ac2-40a5-ba11-1a96156c5889', 'Product 2', 3690, $createdAt));
 
         $this->assertEquals([
             'total_price' => 5680,
@@ -44,13 +46,13 @@ class CartBuilderTest extends TestCase
                     'id' => '16e0226c-0ed8-434a-9342-429aefeb98f0',
                     'name' => 'Product 1',
                     'price' => 1990,
-                    'quantity' => 1,
+                    'quantity' => 1
                 ],
                 [
                     'id' => '5884ad4c-9ac2-40a5-ba11-1a96156c5889',
                     'name' => 'Product 2',
                     'price' => 3690,
-                    'quantity' => 1,
+                    'quantity' => 1
                 ],
             ]
         ], $this->builder->__invoke($cart));
