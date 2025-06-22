@@ -21,11 +21,11 @@ class ProductRepository implements ProductProvider, ProductService
     public function getProducts(int $page = 0, int $count = 3): iterable
     {
         return $this->repository->createQueryBuilder('p')
+            ->orderBy('p.createdAt', 'DESC')
             ->setMaxResults($count)
             ->setFirstResult($page * $count)
             ->getQuery()
-            ->getResult()
-        ;
+            ->getResult();
     }
 
     public function getTotalCount(): int
@@ -40,7 +40,7 @@ class ProductRepository implements ProductProvider, ProductService
 
     public function add(string $name, int $price): Product
     {
-        $product = new \App\Entity\Product(Uuid::uuid4(), $name, $price);
+        $product = new \App\Entity\Product(Uuid::uuid4(), $name, $price, new \DateTimeImmutable());
 
         $this->entityManager->persist($product);
         $this->entityManager->flush();
