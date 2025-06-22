@@ -1,22 +1,22 @@
 <?php
 
-namespace App\Tests\Integration\Repository;
+namespace App\Tests\Integration\Service;
 
 use App\Entity\CartAddProductStatus;
-use App\Repository\CartRepository;
+use App\Service\Cart\CartServiceInterface;
 use App\Tests\Integration\KernelTestCase;
 
-class CartRepositoryTest extends KernelTestCase
+class CartServiceTest extends KernelTestCase
 {
-    private CartRepository $cartRepository;
+    private CartServiceInterface $cartService;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->loadFixtures(new AddProductRepositoryFixture());
+        $this->loadFixtures(new AddProductToTheCartFixture());
 
-        $this->cartRepository = static::getContainer()->get(CartRepository::class);
+        $this->cartService = static::getContainer()->get(CartServiceInterface::class);
     }
 
     public function test_refuses_to_add_fourth_product_to_cart(): void
@@ -25,7 +25,7 @@ class CartRepositoryTest extends KernelTestCase
         $cartId = '1e82de36-23f3-4ae7-ad5d-616295f1d6c0';
         $productId = '9670ea5b-d940-4593-a2ac-4589be784203';
 
-        $this->cartRepository->addProduct($operationId, $cartId, $productId);
+        $this->cartService->addProduct($operationId, $cartId, $productId);
 
         $found = $this->entityManager->find(CartAddProductStatus::class, $operationId);
 
